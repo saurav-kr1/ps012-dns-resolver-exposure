@@ -124,6 +124,22 @@ docker compose down
 
 ---
 
+## Part C: Demo, experiments and reports
+
+| What | Where |
+|---|---|
+| One-command live demo (11 steps, with talking points) | `powershell -ExecutionPolicy Bypass -File scripts\demo.ps1 -Pause` |
+| Presenter guide and likely mentor questions | `docs/DEMO_SCRIPT.md` |
+| Pseudocode snippet for the mentor | `docs/pseudocode.txt` |
+| Experiment A: no test-zone log (dnsmasq becomes inconclusive) | `docker compose run --rm probe python -m probe.main --config config/probe.nolog.yaml --out results/nolog` |
+| Experiment B: packet loss vs retries on t08 | `docker compose run --rm probe python -m probe.experiments lossy --runs 40` |
+| Final exposure assessment report (with false/inconclusive analysis) | `docs/PS-012_Final_Exposure_Report.pdf` |
+| Technical submission in the hackathon structure | `docs/PS-012_Technical_Submission.pdf` |
+| Sample report from one real run | `docs/sample_run/report.md` |
+| Raw data used in the final report | `docs/final_report_data/` |
+
+---
+
 ## How the tool decides (the heart of the project)
 
 For each target, three times (then majority vote):

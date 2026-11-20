@@ -1,0 +1,26 @@
+PS-012 pseudocode: authorised DNS resolver exposure assessment (lab only)
+
+load config and targets            # abort if more than 20, duplicates, or any public IP
+for each target (every send passes the rate limiter, which also enforces the budget):
+    for attempt in 1..3:
+        nonce = random_label()
+        r1  = query(target, nonce + ".probe.lab.test", TXT, RD=1)           # recursion probe
+        r2  = query(target, target.own_zone, SOA, RD=0) if target.own_zone  # authority probe
+        hit = testzone_log_has(nonce, from=target.lab_ip) if r1 answered correctly
+        votes.append(classify(r1, r2, hit))
+    label = majority_vote(votes)       # needs more than half, else INCONCLUSIVE
+compare labels with targets.yaml  ->  accuracy, confusion matrix, mismatch analysis, report
+
+classify(r1, r2, hit):
+    if no valid r1 and no valid r2:                  return INCONCLUSIVE, "no_response"
+    if r1 is NOERROR and r1.RA and r1 has marker TXT:
+        if r1.AA and hit is not True:                return INCONCLUSIVE, "aa_set_unconfirmed"
+        return RECURSIVE, "resolved" (+ "log_confirmed" if hit)
+    if r2 and r2.AA and r2 is NOERROR:               return AUTH_ONLY, "aa_on_own_zone"
+    if REFUSED in (r1.rcode, r2.rcode):              return REFUSED, "rcode_refused"
+    return INCONCLUSIVE, reason(r1, r2)
+
+rate limiter (token bucket):
+    tokens refill at `rate` per second, holding at most 1
+    every query spends one token and waits if none is left
+    limits: 5 per second overall, 1 per second per target, 500 queries per run (hard stop)

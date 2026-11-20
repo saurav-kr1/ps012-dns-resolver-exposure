@@ -1,0 +1,141 @@
+{
+  "stability_runs": [
+    {
+      "run_id": "20261120-104037",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 41,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104103",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 39,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104129",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 40,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104155",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 39,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104221",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 41,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104247",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 39,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104312",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 40,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104338",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 39,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104404",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 39,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104430",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 40,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104456",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 39,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-104521",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 41,
+      "peak": 5
+    }
+  ],
+  "rehearsal_runs": [
+    {
+      "run_id": "20261120-103817",
+      "correct": 7,
+      "total": 8,
+      "t08": "inconclusive",
+      "t08_reason": "no_response",
+      "queries": 45,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-103842",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 42,
+      "peak": 5
+    },
+    {
+      "run_id": "20261120-103908",
+      "correct": 8,
+      "total": 8,
+      "t08": "recursive",
+      "t08_reason": "resolved+log_confirmed",
+      "queries": 39,
+      "peak": 5
+    }
+  ]
+}

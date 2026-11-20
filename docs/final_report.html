@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>PS-012 Final Exposure Assessment Report</title><style>
+@page { size: A4; margin: 18mm 17mm 20mm 17mm; @bottom-center { content: counter(page); font: 9pt "Segoe UI", Arial, sans-serif; color: #888780; } }
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; color: #2C2C2A; margin: 0; }
+h1 { font-size: 24pt; margin: 0 0 4px; color: #26215C; font-weight: 600; line-height: 1.2; }
+h2 { font-size: 15pt; color: #26215C; border-bottom: 2px solid #AFA9EC; padding-bottom: 3px; margin: 24px 0 8px; font-weight: 600; page-break-after: avoid; }
+h3 { font-size: 11.5pt; color: #3C3489; margin: 14px 0 4px; font-weight: 600; page-break-after: avoid; }
+p { margin: 5px 0; } ul, ol { margin: 5px 0; padding-left: 22px; } li { margin: 2px 0; }
+table { border-collapse: collapse; width: 100%; margin: 7px 0 10px; font-size: 9.3pt; page-break-inside: avoid; }
+th, td { border: 1px solid #D3D1C7; padding: 4px 7px; text-align: left; vertical-align: top; }
+th { background: #EEEDFE; color: #26215C; font-weight: 600; }
+tr:nth-child(even) td { background: #FAFAF7; }
+code { font-family: Consolas, "Courier New", monospace; font-size: 9pt; background: #F1EFE8; padding: 1px 4px; border-radius: 3px; }
+.small { font-size: 8.5pt; color: #5F5E5A; }
+.box { border-radius: 6px; padding: 7px 11px; margin: 8px 0; page-break-inside: avoid; }
+.key { background: #E1F5EE; border: 1px solid #5DCAA5; } .warn { background: #FAEEDA; border: 1px solid #EF9F27; }
+.label { font-size: 8.5pt; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; display: block; margin-bottom: 1px; color: #0F6E56; }
+.warn .label { color: #854F0B; }
+.ok { color: #0F6E56; font-weight: 600; } .todo { color: #A32D2D; font-weight: 600; }
+.head { text-align: center; border-bottom: 3px solid #534AB7; padding-bottom: 10px; margin-bottom: 12px; }
+.head .kicker { font-size: 10pt; letter-spacing: 2px; text-transform: uppercase; color: #534AB7; font-weight: 600; }
+.head .sub { color: #534AB7; font-size: 12pt; } .head .who { margin-top: 6px; font-size: 10.5pt; color: #444441; }
+figure { margin: 10px 0 12px; page-break-inside: avoid; text-align: center; } figure svg { width: 100%; max-width: 600px; height: auto; }
+figcaption { font-size: 9pt; color: #5F5E5A; font-style: italic; margin-top: 3px; }
+svg text { font-family: "Segoe UI", Arial, sans-serif; } .ts { font-size: 11px; fill: #5F5E5A; } .th { font-size: 12px; font-weight: 600; fill: #2C2C2A; }
+</style></head><body>
+<div class="head"><div class="kicker">AIORI-3 · Cybersecurity · PS-012</div>
+<h1>DNS Resolver Exposure Assessment Report</h1>
+<div class="sub">Final report with false and inconclusive result analysis</div>
+<div class="who">Saurav Kumar (264101047) &amp; Tanay Umesh Hambire (264101057) · 20 November 2026</div></div>
+
+<h2 style="margin-top:6px">1. Executive summary</h2>
+<p>We assessed <b>8 authorised lab DNS servers</b> from an external client, using a rate-limited probe tool, and compared every result with a seeded ground truth. The assessment was run three times with identical settings.</p>
+<table>
+<tr><th style="width:42%">Measure</th><th>Result</th></tr>
+<tr><td>Servers assessed</td><td>8 (limit 20), all private lab addresses</td></tr>
+<tr><td>Accuracy against ground truth</td><td><b>8 of 8 correct in every run</b> (8, 8, 8)</td></tr>
+<tr><td>Same label for every server in all three runs</td><td><b>Yes</b> (config fingerprint <code>3e7e861561b3</code>)</td></tr>
+<tr><td>Open recursive resolvers found</td><td><b>3</b> (t01, t02, t08), each confirmed by the test-zone log in every run</td></tr>
+<tr><td>Correctly closed servers</td><td>t03 (refused), t04 (authoritative-only)</td></tr>
+<tr><td>Inconclusive servers</td><td>t05, t06, t07, all expected; t07 is a <b>potential</b> exposure, see Section 6</td></tr>
+<tr><td>Further checks with the final settings</td><td>14 of 15 runs fully correct; one run labelled t08 <b>inconclusive</b> (unexplained, failed safe, see Section 5.5)</td></tr>
+<tr><td>Queries per run / peak rate</td><td>39 to 45 queries (budget 500); peak 5 queries in any second (limit 5)</td></tr>
+</table>
+<div class="box key"><span class="label">Main findings</span>
+Three of the eight lab servers answer recursive queries from an outside client and should be restricted to their intended clients (RFC 5358, Section 4). The tool never guessed: where evidence was weak it said <b>inconclusive</b> with a reason, and one experiment showed it fails safely when its second proof is removed.</div>
+
+<h2>2. Scope, method and safety rules</h2>
+<p><b>Scope.</b> Recursion exposure only, on authorised lab servers, from a separate client network. Out of scope: Internet-wide scanning, spoofed traffic and amplification stress testing.</p>
+<p><b>Method.</b> For each server, three times: (P1) ask for a never-before-seen random name under our test zone with recursion desired; a correct answer proves a real lookup. (P2) if the server owns a zone, ask for it with recursion off and look for the authoritative flag. The test-zone server logs who asked, which gives an independent second proof. Attempts are combined by majority vote; a label needs more than half the votes, otherwise the server is inconclusive.</p>
+<p><b>Safety rules enforced by the tool:</b> allowlist of at most 20 private addresses; real source address only; small plain queries (no ANY, no large buffers); global limit 5 queries per second, per-target limit 1 per second, hard budget of 500 queries; isolated networks with no Internet access.</p>
+
+<h2>3. Test environment and ground truth</h2>
+<table><tr><th>ID</th><th>Server</th><th>How it was set up</th><th>Expected label</th></tr>
+<tr><td><b>t01</b></td><td>open-unbound</td><td>Unbound that answers recursive queries from anyone</td><td>recursive</td></tr><tr><td><b>t02</b></td><td>open-dnsmasq</td><td>dnsmasq forwarder that answers anyone</td><td>recursive</td></tr><tr><td><b>t03</b></td><td>acl-unbound</td><td>Unbound that only serves the lab network (RFC 5358 Method 1, ACL)</td><td>refused</td></tr><tr><td><b>t04</b></td><td>auth-bind</td><td>BIND with recursion off, authoritative for example-lab.test</td><td>authoritative-only</td></tr><tr><td><b>t05</b></td><td>iface-unbound</td><td>Unbound listening only on the lab interface (RFC 5358 Method 2); no reply on the probed address</td><td>inconclusive</td></tr><tr><td><b>t06</b></td><td>dead</td><td>Nothing is listening on port 53</td><td>inconclusive</td></tr><tr><td><b>t07</b></td><td>servfail-unbound</td><td>Open resolver whose upstream is broken, so it answers SERVFAIL</td><td>inconclusive</td></tr><tr><td><b>t08</b></td><td>lossy-unbound</td><td>Open resolver behind 20% packet loss; retries and majority vote must still find it</td><td>recursive</td></tr></table>
+<p class="small">The probe client (172.31.0.100) sits on a different network from the servers' own lab network (172.30.0.0/24), so it is a genuine outside stranger. The expected labels were written when each server was configured.</p>
+
+<h2>4. Results</h2>
+<h3>4.1 Labels in three identical runs</h3>
+<p>Every random probe name differs from run to run, yet the label of every server is the same each time. The reason code can differ (see t07).</p>
+<table><tr><th>ID</th><th>Server</th><th>Expected</th><th>Run 1</th><th>Run 2</th><th>Run 3</th><th>Same label?</th></tr><tr><td><b>t01</b></td><td>open-unbound</td><td>recursive</td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td class='ok'>yes</td></tr><tr><td><b>t02</b></td><td>open-dnsmasq</td><td>recursive</td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td class='ok'>yes</td></tr><tr><td><b>t03</b></td><td>acl-unbound</td><td>refused</td><td>refused<br><span class='small'>rcode_refused</span></td><td>refused<br><span class='small'>rcode_refused</span></td><td>refused<br><span class='small'>rcode_refused</span></td><td class='ok'>yes</td></tr><tr><td><b>t04</b></td><td>auth-bind</td><td>authoritative-only</td><td>authoritative-only<br><span class='small'>aa_on_own_zone</span></td><td>authoritative-only<br><span class='small'>aa_on_own_zone</span></td><td>authoritative-only<br><span class='small'>aa_on_own_zone</span></td><td class='ok'>yes</td></tr><tr><td><b>t05</b></td><td>iface-unbound</td><td>inconclusive</td><td>inconclusive<br><span class='small'>no_response</span></td><td>inconclusive<br><span class='small'>no_response</span></td><td>inconclusive<br><span class='small'>no_response</span></td><td class='ok'>yes</td></tr><tr><td><b>t06</b></td><td>dead</td><td>inconclusive</td><td>inconclusive<br><span class='small'>no_response</span></td><td>inconclusive<br><span class='small'>no_response</span></td><td>inconclusive<br><span class='small'>no_response</span></td><td class='ok'>yes</td></tr><tr><td><b>t07</b></td><td>servfail-unbound</td><td>inconclusive</td><td>inconclusive<br><span class='small'>no_response</span></td><td>inconclusive<br><span class='small'>servfail</span></td><td>inconclusive<br><span class='small'>servfail</span></td><td class='ok'>yes</td></tr><tr><td><b>t08</b></td><td>lossy-unbound</td><td>recursive</td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td>recursive<br><span class='small'>resolved+log_confirmed</span></td><td class='ok'>yes</td></tr></table>
+
+<h3>4.2 Accuracy, confusion matrix and per-class metrics</h3>
+<p>Accuracy: <b>8 of 8 = 100%</b> in each of the three runs. Confusion matrix of the final run (rows = expected, columns = predicted):</p>
+<table><tr><th>expected \ predicted</th><th>recursive</th><th>authoritative-only</th><th>refused</th><th>inconclusive</th></tr><tr><td><b>recursive</b></td><td>3</td><td>0</td><td>0</td><td>0</td></tr><tr><td><b>authoritative-only</b></td><td>0</td><td>1</td><td>0</td><td>0</td></tr><tr><td><b>refused</b></td><td>0</td><td>0</td><td>1</td><td>0</td></tr><tr><td><b>inconclusive</b></td><td>0</td><td>0</td><td>0</td><td>3</td></tr></table>
+<table><tr><th>Class</th><th>Support</th><th>Precision</th><th>Recall</th></tr><tr><td>recursive</td><td>3</td><td>1.00</td><td>1.00</td></tr><tr><td>authoritative-only</td><td>1</td><td>1.00</td><td>1.00</td></tr><tr><td>refused</td><td>1</td><td>1.00</td><td>1.00</td></tr><tr><td>inconclusive</td><td>3</td><td>1.00</td><td>1.00</td></tr></table>
+<p class="small">The lab is small and deliberately built, so these figures show that the method works on known cases. They do not claim 100% on arbitrary networks.</p>
+
+<h3>4.3 What the tool actually observed</h3>
+<p>Aggregated over the three runs (recursion probe, all attempts):</p>
+<table><tr><th>ID</th><th>Replies seen (recursion probe)</th><th>Flags</th><th>Median latency</th><th>Probes needing a retry</th><th>Log confirmed</th></tr><tr><td><b>t01</b></td><td>NOERROR x9</td><td>RA </td><td>2.3 ms</td><td>0 of 9</td><td>9/9</td></tr><tr><td><b>t02</b></td><td>NOERROR x9</td><td>RA AA</td><td>2.1 ms</td><td>0 of 9</td><td>9/9</td></tr><tr><td><b>t03</b></td><td>REFUSED x9</td><td>-</td><td>1.1 ms</td><td>0 of 9</td><td>-</td></tr><tr><td><b>t04</b></td><td>REFUSED x9</td><td>-</td><td>1.4 ms</td><td>0 of 9</td><td>-</td></tr><tr><td><b>t05</b></td><td>no reply x9</td><td>-</td><td>-</td><td>9 of 9</td><td>-</td></tr><tr><td><b>t06</b></td><td>no reply x9</td><td>-</td><td>-</td><td>9 of 9</td><td>-</td></tr><tr><td><b>t07</b></td><td>SERVFAIL x6, no reply x3</td><td>RA </td><td>1.2 ms</td><td>3 of 9</td><td>-</td></tr><tr><td><b>t08</b></td><td>NOERROR x9</td><td>RA </td><td>2.0 ms</td><td>1 of 9</td><td>9/9</td></tr></table>
+
+<h3>4.4 Rate control and reproducibility evidence</h3>
+<table><tr><th></th><th>Run 1</th><th>Run 2</th><th>Run 3</th><th>Limit</th></tr>
+<tr><td>Queries sent</td><td>45</td><td>41</td><td>39</td><td>500 (worst case for this run: 144)</td></tr>
+<tr><td>Peak queries in any 1-second window</td><td>5</td><td>5</td><td>5</td><td>5</td></tr>
+<tr><td>Time spent sending</td><td>21.6 s</td><td>22.1 s</td><td>22.0 s</td><td>-</td></tr>
+<tr><td>Accuracy</td><td>8/8</td><td>8/8</td><td>8/8</td><td>-</td></tr>
+</table>
+<p>The peak never exceeded the global limit, and the same configuration fingerprint appears in all three reports.</p>
+
+<h2>5. False and inconclusive result analysis</h2>
+<h3>5.1 The inconclusive servers</h3>
+<table><tr><th style="width:8%">ID</th><th style="width:26%">What the tool saw</th><th style="width:30%">Why</th><th>Is "inconclusive" the right answer?</th></tr>
+<tr><td><b>t05</b></td><td>No reply to any probe (9 probes, all silent)</td><td>The resolver listens only on its lab-side address (RFC 5358, Method 2), so nothing answers on the address the client uses.</td><td>Yes. From this vantage point the server is not reachable, which is the intended restriction. We cannot say what it would do for a client on its own network.</td></tr>
+<tr><td><b>t06</b></td><td>No reply (9 probes, all silent)</td><td>Nothing is listening on port 53 at all.</td><td>Yes. There is nothing to classify. It is indistinguishable from a firewalled server, so the tool does not claim more.</td></tr>
+<tr><td><b>t07</b></td><td>Reason varied across runs: run 1: no_response, run 2: servfail, run 3: servfail</td><td>The server is willing to recurse but its upstream is broken. Unbound answers SERVFAIL, or answers so close to our 2-second timeout that the reply is missed.</td><td>Yes for the label, but treat the server as <b>potentially exposed</b>. A broken upstream does not close the door: once it is repaired, this resolver would answer anyone.</td></tr>
+</table>
+<p>The label for t07 stayed <code>inconclusive</code> in every run, so the variation is in the reason text only. This is documented expected behaviour, not a reliability problem.</p>
+
+<h3>5.2 How each possible mistake is guarded against</h3>
+<table><tr><th style="width:24%">Possible mistake</th><th>Cause</th><th>Safeguard</th></tr>
+<tr><td>False "recursive" from a cached answer</td><td>A fixed probe name could already be in a cache</td><td>A fresh random name every query</td></tr>
+<tr><td>False "recursive" from a forwarder's flag</td><td>dnsmasq copies the upstream's AA flag, so flags alone are ambiguous</td><td>If AA is set, the test-zone log must show that the server itself asked, otherwise inconclusive (Experiment A)</td></tr>
+<tr><td>Closed resolver mistaken for authoritative-only (or the reverse)</td><td>Both answer REFUSED to a foreign name</td><td>Authority probe P2 is checked before "refused"</td></tr>
+<tr><td>False "not recursive" from packet loss</td><td>A real open resolver whose replies are lost</td><td>Retries and majority vote (Experiment B)</td></tr>
+<tr><td>False "not recursive" from a broken upstream</td><td>SERVFAIL looks like a refusal</td><td>SERVFAIL is reported as inconclusive, never as "not recursive"</td></tr>
+<tr><td>Missed exposure for other source networks</td><td>An ACL that depends on the client's address</td><td>Not solvable from one vantage point; listed as a limitation</td></tr>
+</table>
+
+<h3>5.3 Experiment A: what if the test-zone log is missing?</h3>
+<p>We ran the full assessment again with the log switched off (<code>config/probe.nolog.yaml</code>). The result:</p>
+<table><tr><th>ID</th><th>Expected</th><th>Predicted</th><th>Reason</th></tr><tr><td><b>t01</b></td><td>recursive</td><td class=''>recursive</td><td>resolved</td></tr><tr><td><b>t02</b></td><td>recursive</td><td class='todo'>inconclusive</td><td>aa_set_unconfirmed</td></tr><tr><td><b>t03</b></td><td>refused</td><td class=''>refused</td><td>rcode_refused</td></tr><tr><td><b>t04</b></td><td>authoritative-only</td><td class=''>authoritative-only</td><td>aa_on_own_zone</td></tr><tr><td><b>t05</b></td><td>inconclusive</td><td class=''>inconclusive</td><td>no_response</td></tr><tr><td><b>t06</b></td><td>inconclusive</td><td class=''>inconclusive</td><td>no_response</td></tr><tr><td><b>t07</b></td><td>inconclusive</td><td class=''>inconclusive</td><td>no_response</td></tr><tr><td><b>t08</b></td><td>recursive</td><td class=''>recursive</td><td>resolved</td></tr></table>
+<p>Accuracy fell to <b>7 of 8</b>. The only change is <b>t02</b> (the dnsmasq forwarder): its reply carries the AA flag, and without the log the tool cannot rule out that it simply hosts the zone, so it reports <code>aa_set_unconfirmed</code> instead of guessing. This is a <b>safe failure</b>: an exposure is reported as inconclusive, not as safe and not as a false certainty. The other open resolvers (t01 and t08) do not set AA, so they are still found.</p>
+
+<h3>5.4 Experiment B: packet loss and retries</h3>
+<p>The lossy server t08 is a genuine open resolver whose replies are dropped 20% of the time. We assessed this one server <b>40 times</b> for each retry setting (still under the rate limits) and counted how often it was <b>not</b> labelled recursive, which is a false negative for exposure.</p>
+<table><tr><th>Retries per probe</th><th>Runs</th><th>Labelled recursive</th><th>Not recursive (false negative)</th><th>Expected from theory</th><th>Average queries per run</th></tr><tr><td>0</td><td>40</td><td>32</td><td><b>8</b> (20.0%)</td><td>10.40%</td><td>3.0</td></tr><tr><td>1</td><td>40</td><td>40</td><td><b>0</b> (0.0%)</td><td>0.47%</td><td>3.6</td></tr><tr><td>2</td><td>40</td><td>40</td><td><b>0</b> (0.0%)</td><td>0.02%</td><td>3.58</td></tr></table>
+<figure><svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg"><line x1="70" y1="190.0" x2="590" y2="190.0" stroke="#D3D1C7" stroke-width=".6"/><text class="ts" x="62" y="194.0" text-anchor="end">0%</text><line x1="70" y1="135.6" x2="590" y2="135.6" stroke="#D3D1C7" stroke-width=".6"/><text class="ts" x="62" y="139.6" text-anchor="end">8%</text><line x1="70" y1="81.2" x2="590" y2="81.2" stroke="#D3D1C7" stroke-width=".6"/><text class="ts" x="62" y="85.2" text-anchor="end">16%</text><line x1="70" y1="26.8" x2="590" y2="26.8" stroke="#D3D1C7" stroke-width=".6"/><text class="ts" x="62" y="30.8" text-anchor="end">24%</text><rect x="100" y="54.0" width="56" height="136.0" fill="#D85A30" rx="2"/><text class="ts" x="128" y="49.0" text-anchor="middle">20.0%</text><rect x="164" y="119.3" width="56" height="70.7" fill="#7F77DD" rx="2"/><text class="ts" x="192" y="114.3" text-anchor="middle">10.4%</text><text class="th" x="160" y="210" text-anchor="middle">0 retries</text><rect x="270" y="190.0" width="56" height="1.0" fill="#D85A30" rx="2"/><text class="ts" x="298" y="185.0" text-anchor="middle">0.0%</text><rect x="334" y="186.8" width="56" height="3.2" fill="#7F77DD" rx="2"/><text class="ts" x="362" y="181.8" text-anchor="middle">0.5%</text><text class="th" x="330" y="210" text-anchor="middle">1 retries</text><rect x="440" y="190.0" width="56" height="1.0" fill="#D85A30" rx="2"/><text class="ts" x="468" y="185.0" text-anchor="middle">0.0%</text><rect x="504" y="189.9" width="56" height="1.0" fill="#7F77DD" rx="2"/><text class="ts" x="532" y="184.9" text-anchor="middle">0.0%</text><text class="th" x="500" y="210" text-anchor="middle">2 retries</text><rect x="80" y="226" width="12" height="12" fill="#D85A30" rx="2"/><text class="ts" x="98" y="236">measured (40 runs per setting)</text><rect x="310" y="226" width="12" height="12" fill="#7F77DD" rx="2"/><text class="ts" x="328" y="236">expected from theory</text></svg><figcaption>Figure 1: How often a real open resolver behind 20% packet loss is missed, by number of retries.</figcaption></figure>
+<p><b>How to read it.</b> If one reply is lost with probability 0.2, a probe with <i>n</i> retries fails with probability 0.2<sup>n+1</sup>; with three attempts and a majority vote the expected miss rate is the "theory" column. More retries make a miss far less likely at the cost of a few extra queries per run. With 40 runs per setting the measurement is noisy: at 0 retries theory predicts about 4.2 misses (standard deviation about 1.9), and we measured 8, which is 2.0 standard deviations above that. We report the measured value as it is and do not adjust it. A larger sample would narrow the gap; the conclusion does not depend on it, because every setting with at least one retry found the open resolver in all of its runs. In the three real runs of the full assessment (2 retries), 1 of 9 t08 probes needed more than one try, and t08 was still labelled recursive every time.</p>
+
+<h3>5.5 An unexplained outlier</h3>
+<p>After the three documented runs we rehearsed the live demo and then ran a stability test. Of the <b>15 further runs</b> with the final settings, <b>14 were fully correct</b> (12 of 12 in the stability test). In <b>one run</b> (the first live run of the rehearsal, <code>20261120-103817</code>) the lossy server t08 was labelled <code>inconclusive</code> instead of <code>recursive</code>, giving 7 of 8.</p>
+<table><tr><th>Attempt</th><th>Tries used</th><th>Reply</th><th>Latency</th><th>Label of this attempt</th></tr><tr><td>1</td><td>1</td><td>answered</td><td>1032 ms</td><td>recursive (resolved+log_confirmed)</td></tr><tr><td>2</td><td>3</td><td>none (timeout)</td><td>-</td><td>inconclusive (no_response)</td></tr><tr><td>3</td><td>3</td><td>none (timeout)</td><td>-</td><td>inconclusive (no_response)</td></tr></table>
+<p><b>What the evidence shows.</b> The first attempt resolved normally (after an unusually slow first reply). Attempts 2 and 3 each lost all 3 tries, although the test-zone log shows that the resolver did look the names up. Two such failures in a row are far less likely than 20% random loss would suggest (about 0.8% per attempt, so well under 0.01% for two), so simple packet loss is probably not the whole explanation.</p>
+<p><b>What we do not know.</b> We could not reproduce it: the next 14 runs were all correct. One possible factor is that the run started right after several containers had just been created and removed, which may briefly disturb the virtual network, but we did not confirm this and do not claim it as the cause.</p>
+<p><b>Why it still matters.</b> The tool failed in the safe direction: a real open resolver was reported as <b>inconclusive</b>, not as closed. An operator reading the report is told that the result is uncertain, not that the server is safe. It also illustrates why a single run is weaker evidence than repeated runs, and why the tool reports reason codes. A larger sample would give a better estimate of how often this happens.</p>
+
+<h3>5.6 Limitations</h3>
+<ul>
+<li>The lab is a model of real networks, and the same person built the servers and the answer key.</li>
+<li>Results come from a single vantage point, so servers that are open only to some source networks could look refused.</li>
+<li>Only recursion exposure is tested; nothing else about the servers' security is assessed.</li>
+<li>Experiment B uses simulated loss on replies only; real networks may also drop queries or add delay.</li>
+</ul>
+
+<h2>6. Findings and recommendations</h2>
+<table><tr><th style="width:7%">ID</th><th style="width:22%">Verdict</th><th>Recommended action (RFC 5358)</th></tr>
+<tr><td><b>t01</b></td><td class="todo">Exposed: open resolver</td><td>Restrict recursion to the intended clients with an ACL (Method 1): allow only the lab network and refuse everyone else.</td></tr>
+<tr><td><b>t02</b></td><td class="todo">Exposed: open forwarder</td><td>Restrict who may use the forwarder (for example <code>local-service</code> or an interface restriction in dnsmasq, Method 2).</td></tr>
+<tr><td><b>t03</b></td><td class="ok">Not exposed: refuses outsiders</td><td>Correct configuration. Keep the ACL.</td></tr>
+<tr><td><b>t04</b></td><td class="ok">Not exposed: authoritative-only</td><td>Correct. Keep <code>recursion no</code>; keep recursive and authoritative roles on separate servers.</td></tr>
+<tr><td><b>t05</b></td><td>Not reachable from the outside</td><td>Interface restriction works from this vantage point. Re-test from a second client network to confirm.</td></tr>
+<tr><td><b>t06</b></td><td>Nothing listening</td><td>Check whether a DNS service was meant to run here.</td></tr>
+<tr><td><b>t07</b></td><td class="todo">Potentially exposed</td><td>Restrict recursion to the intended clients <b>before</b> repairing the upstream, then re-test.</td></tr>
+<tr><td><b>t08</b></td><td class="todo">Exposed despite packet loss</td><td>Same fix as t01. Packet loss does not protect a resolver; it only made it harder to detect.</td></tr>
+</table>
+<p>For all networks, RFC 5358 also asks operators to deploy ingress filtering (BCP 38, or BCP 84 for multihomed networks), because blocking spoofed source addresses is the only fix for the root cause of reflection attacks.</p>
+
+<h2>7. Conclusion</h2>
+<p>The tool found every open resolver in the lab, correctly identified the two properly closed servers, and reported the three unclear cases honestly. Results were identical in the three documented runs and correct in 14 of 15 further runs, with one unexplained exception that failed safe (Section 5.5). The tool stayed within its rate limits, and the weak points (forwarder flags, packet loss, broken upstreams) were tested rather than assumed. The analysis shows that an <b>inconclusive</b> result is not the same as safe, and that the design fails toward caution.</p>
+
+<h2>Appendix: how to reproduce</h2>
+<ol>
+<li>Start Docker Desktop, then <code>docker compose up -d</code> in the project folder.</li>
+<li>Full assessment: <code>docker compose run --rm probe</code> (report in <code>results/&lt;run&gt;/report.md</code>).</li>
+<li>Compare runs: <code>python -m probe.compare results/&lt;run1&gt; results/&lt;run2&gt; results/&lt;run3&gt;</code></li>
+<li>Experiment A: <code>docker compose run --rm probe python -m probe.main --config config/probe.nolog.yaml --out results/nolog</code></li>
+<li>Experiment B: <code>docker compose run --rm probe python -m probe.experiments lossy --runs 40</code></li>
+</ol>
+<p class="small">Raw data used for this report is in <code>docs/final_report_data/</code>.</p>
+</body></html>

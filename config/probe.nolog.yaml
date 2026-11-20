@@ -1,0 +1,20 @@
+# EXPERIMENT A: identical to probe.yaml, but the test-zone log is NOT available.
+# Used in the final report to show how the tool behaves when it cannot confirm recursion
+# independently (the dnsmasq / AA-flag case must become "inconclusive", not a guess).
+zone: probe.lab.test
+expected_txt: aiori-probe-ok
+testzone_log: null
+
+rate_control:
+  global_qps: 5
+  per_target_qps: 1
+  max_concurrency: 4
+  timeout_s: 2
+  retries: 2
+  backoff_s: 0.5
+  attempts_per_probe: 3
+  max_total_queries: 500
+
+safety:
+  max_targets: 20
+  require_private_ips: true

@@ -1,0 +1,44 @@
+{
+  "experiment": "lossy_retries",
+  "target": "t08",
+  "loss_percent": 20,
+  "attempts_per_probe": 3,
+  "per_target_qps": 5.0,
+  "timestamp": "2026-11-20T10:37:12",
+  "results": [
+    {
+      "retries": 0,
+      "runs": 40,
+      "recursive": 32,
+      "not_recursive": 8,
+      "labels": {
+        "inconclusive": 8,
+        "recursive": 32
+      },
+      "avg_queries_per_run": 3.0,
+      "seconds": 74.8
+    },
+    {
+      "retries": 1,
+      "runs": 40,
+      "recursive": 40,
+      "not_recursive": 0,
+      "labels": {
+        "recursive": 40
+      },
+      "avg_queries_per_run": 3.6,
+      "seconds": 81.7
+    },
+    {
+      "retries": 2,
+      "runs": 40,
+      "recursive": 40,
+      "not_recursive": 0,
+      "labels": {
+        "recursive": 40
+      },
+      "avg_queries_per_run": 3.58,
+      "seconds": 73.7
+    }
+  ]
+}

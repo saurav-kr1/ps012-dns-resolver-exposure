@@ -1,0 +1,759 @@
+{
+  "meta": {
+    "run_id": "20261118-071214",
+    "timestamp": "2026-11-18T07:12:38",
+    "config_fingerprint": "3e7e861561b3",
+    "config": "config/probe.yaml",
+    "targets_file": "config/targets.yaml"
+  },
+  "stats": {
+    "queries_sent": 39,
+    "budget": 500,
+    "peak_queries_in_1s": 5,
+    "duration_s": 22.0,
+    "global_qps_limit": 5,
+    "per_target_qps_limit": 1
+  },
+  "evaluation": {
+    "total": 8,
+    "correct": 8,
+    "accuracy": 1.0,
+    "matrix": {
+      "recursive": {
+        "recursive": 3,
+        "authoritative-only": 0,
+        "refused": 0,
+        "inconclusive": 0
+      },
+      "authoritative-only": {
+        "recursive": 0,
+        "authoritative-only": 1,
+        "refused": 0,
+        "inconclusive": 0
+      },
+      "refused": {
+        "recursive": 0,
+        "authoritative-only": 0,
+        "refused": 1,
+        "inconclusive": 0
+      },
+      "inconclusive": {
+        "recursive": 0,
+        "authoritative-only": 0,
+        "refused": 0,
+        "inconclusive": 3
+      }
+    },
+    "per_class": {
+      "recursive": {
+        "support": 3,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "authoritative-only": {
+        "support": 1,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "refused": {
+        "support": 1,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "inconclusive": {
+        "support": 3,
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "mismatches": []
+  },
+  "results": [
+    {
+      "id": "t01",
+      "name": "open-unbound",
+      "ip": "172.31.0.11",
+      "expected": "recursive",
+      "label": "recursive",
+      "reason": "resolved+log_confirmed",
+      "match": true,
+      "votes": {
+        "recursive": 3
+      },
+      "evidence": "P1 rcode=NOERROR, RA=1 AA=0"
+    },
+    {
+      "id": "t02",
+      "name": "open-dnsmasq",
+      "ip": "172.31.0.12",
+      "expected": "recursive",
+      "label": "recursive",
+      "reason": "resolved+log_confirmed",
+      "match": true,
+      "votes": {
+        "recursive": 3
+      },
+      "evidence": "P1 rcode=NOERROR, RA=1 AA=1"
+    },
+    {
+      "id": "t03",
+      "name": "acl-unbound",
+      "ip": "172.31.0.13",
+      "expected": "refused",
+      "label": "refused",
+      "reason": "rcode_refused",
+      "match": true,
+      "votes": {
+        "refused": 3
+      },
+      "evidence": "P1 rcode=REFUSED, RA=0 AA=0"
+    },
+    {
+      "id": "t04",
+      "name": "auth-bind",
+      "ip": "172.31.0.14",
+      "expected": "authoritative-only",
+      "label": "authoritative-only",
+      "reason": "aa_on_own_zone",
+      "match": true,
+      "votes": {
+        "authoritative-only": 3
+      },
+      "evidence": "P1 rcode=REFUSED, RA=0 AA=0"
+    },
+    {
+      "id": "t05",
+      "name": "iface-unbound",
+      "ip": "172.31.0.15",
+      "expected": "inconclusive",
+      "label": "inconclusive",
+      "reason": "no_response",
+      "match": true,
+      "votes": {
+        "inconclusive": 3
+      },
+      "evidence": "P1 rcode=timeout"
+    },
+    {
+      "id": "t06",
+      "name": "dead",
+      "ip": "172.31.0.16",
+      "expected": "inconclusive",
+      "label": "inconclusive",
+      "reason": "no_response",
+      "match": true,
+      "votes": {
+        "inconclusive": 3
+      },
+      "evidence": "P1 rcode=timeout"
+    },
+    {
+      "id": "t07",
+      "name": "servfail-unbound",
+      "ip": "172.31.0.17",
+      "expected": "inconclusive",
+      "label": "inconclusive",
+      "reason": "servfail",
+      "match": true,
+      "votes": {
+        "inconclusive": 3
+      },
+      "evidence": "P1 rcode=SERVFAIL, RA=1 AA=0"
+    },
+    {
+      "id": "t08",
+      "name": "lossy-unbound",
+      "ip": "172.31.0.18",
+      "expected": "recursive",
+      "label": "recursive",
+      "reason": "resolved+log_confirmed",
+      "match": true,
+      "votes": {
+        "recursive": 3
+      },
+      "evidence": "P1 rcode=NOERROR, RA=1 AA=0"
+    }
+  ],
+  "attempts": {
+    "t01": [
+      {
+        "attempt": 1,
+        "nonce": "ikxqyl7lxd",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "ikxqyl7lxd.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": false,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 5.3,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 2,
+        "nonce": "2ghtjb4pz3",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "2ghtjb4pz3.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": false,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 2.5,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 3,
+        "nonce": "yl33dm6185",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "yl33dm6185.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": false,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 1.8,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      }
+    ],
+    "t02": [
+      {
+        "attempt": 1,
+        "nonce": "acu5ibqitq",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "acu5ibqitq.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": true,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 2.0,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 2,
+        "nonce": "siw7mdqffp",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "siw7mdqffp.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": true,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 2.1,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 3,
+        "nonce": "yp4tomowm2",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "yp4tomowm2.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": true,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 2.8,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      }
+    ],
+    "t03": [
+      {
+        "attempt": 1,
+        "nonce": "dx9ev1r7z1",
+        "label": "refused",
+        "reason": "rcode_refused",
+        "log_hit": null,
+        "p1": {
+          "qname": "dx9ev1r7z1.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "REFUSED",
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.0,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 2,
+        "nonce": "ngxlv4gfme",
+        "label": "refused",
+        "reason": "rcode_refused",
+        "log_hit": null,
+        "p1": {
+          "qname": "ngxlv4gfme.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "REFUSED",
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.1,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 3,
+        "nonce": "hbt1z63cvs",
+        "label": "refused",
+        "reason": "rcode_refused",
+        "log_hit": null,
+        "p1": {
+          "qname": "hbt1z63cvs.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "REFUSED",
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.1,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      }
+    ],
+    "t04": [
+      {
+        "attempt": 1,
+        "nonce": "775b3c6ay1",
+        "label": "authoritative-only",
+        "reason": "aa_on_own_zone",
+        "log_hit": null,
+        "p1": {
+          "qname": "775b3c6ay1.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "REFUSED",
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.5,
+          "error": null,
+          "tries": 1
+        },
+        "p2": {
+          "qname": "example-lab.test",
+          "qtype": "SOA",
+          "rd": false,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": false,
+          "aa": true,
+          "answers": [
+            "ns1.example-lab.test. admin.example-lab.test. 1 3600 600 86400 60"
+          ],
+          "latency_ms": 2.5,
+          "error": null,
+          "tries": 1
+        }
+      },
+      {
+        "attempt": 2,
+        "nonce": "01irhxwyu0",
+        "label": "authoritative-only",
+        "reason": "aa_on_own_zone",
+        "log_hit": null,
+        "p1": {
+          "qname": "01irhxwyu0.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "REFUSED",
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.6,
+          "error": null,
+          "tries": 1
+        },
+        "p2": {
+          "qname": "example-lab.test",
+          "qtype": "SOA",
+          "rd": false,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": false,
+          "aa": true,
+          "answers": [
+            "ns1.example-lab.test. admin.example-lab.test. 1 3600 600 86400 60"
+          ],
+          "latency_ms": 1.4,
+          "error": null,
+          "tries": 1
+        }
+      },
+      {
+        "attempt": 3,
+        "nonce": "ro21mlhhcz",
+        "label": "authoritative-only",
+        "reason": "aa_on_own_zone",
+        "log_hit": null,
+        "p1": {
+          "qname": "ro21mlhhcz.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "REFUSED",
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.1,
+          "error": null,
+          "tries": 1
+        },
+        "p2": {
+          "qname": "example-lab.test",
+          "qtype": "SOA",
+          "rd": false,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": false,
+          "aa": true,
+          "answers": [
+            "ns1.example-lab.test. admin.example-lab.test. 1 3600 600 86400 60"
+          ],
+          "latency_ms": 1.4,
+          "error": null,
+          "tries": 1
+        }
+      }
+    ],
+    "t05": [
+      {
+        "attempt": 1,
+        "nonce": "m78vk4piai",
+        "label": "inconclusive",
+        "reason": "no_response",
+        "log_hit": null,
+        "p1": {
+          "qname": "m78vk4piai.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": false,
+          "rcode": null,
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": null,
+          "error": "timeout",
+          "tries": 3
+        },
+        "p2": null
+      },
+      {
+        "attempt": 2,
+        "nonce": "xjpa73km17",
+        "label": "inconclusive",
+        "reason": "no_response",
+        "log_hit": null,
+        "p1": {
+          "qname": "xjpa73km17.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": false,
+          "rcode": null,
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": null,
+          "error": "timeout",
+          "tries": 3
+        },
+        "p2": null
+      },
+      {
+        "attempt": 3,
+        "nonce": "55dkh443fm",
+        "label": "inconclusive",
+        "reason": "no_response",
+        "log_hit": null,
+        "p1": {
+          "qname": "55dkh443fm.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": false,
+          "rcode": null,
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": null,
+          "error": "timeout",
+          "tries": 3
+        },
+        "p2": null
+      }
+    ],
+    "t06": [
+      {
+        "attempt": 1,
+        "nonce": "8fe0xzf3cr",
+        "label": "inconclusive",
+        "reason": "no_response",
+        "log_hit": null,
+        "p1": {
+          "qname": "8fe0xzf3cr.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": false,
+          "rcode": null,
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": null,
+          "error": "timeout",
+          "tries": 3
+        },
+        "p2": null
+      },
+      {
+        "attempt": 2,
+        "nonce": "ic5ucxdjie",
+        "label": "inconclusive",
+        "reason": "no_response",
+        "log_hit": null,
+        "p1": {
+          "qname": "ic5ucxdjie.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": false,
+          "rcode": null,
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": null,
+          "error": "timeout",
+          "tries": 3
+        },
+        "p2": null
+      },
+      {
+        "attempt": 3,
+        "nonce": "b61z7m5l8x",
+        "label": "inconclusive",
+        "reason": "no_response",
+        "log_hit": null,
+        "p1": {
+          "qname": "b61z7m5l8x.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": false,
+          "rcode": null,
+          "ra": false,
+          "aa": false,
+          "answers": [],
+          "latency_ms": null,
+          "error": "timeout",
+          "tries": 3
+        },
+        "p2": null
+      }
+    ],
+    "t07": [
+      {
+        "attempt": 1,
+        "nonce": "7r9t3obvep",
+        "label": "inconclusive",
+        "reason": "servfail",
+        "log_hit": null,
+        "p1": {
+          "qname": "7r9t3obvep.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "SERVFAIL",
+          "ra": true,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.3,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 2,
+        "nonce": "877zsrd0d9",
+        "label": "inconclusive",
+        "reason": "servfail",
+        "log_hit": null,
+        "p1": {
+          "qname": "877zsrd0d9.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "SERVFAIL",
+          "ra": true,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.6,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 3,
+        "nonce": "9ydws4ss6t",
+        "label": "inconclusive",
+        "reason": "servfail",
+        "log_hit": null,
+        "p1": {
+          "qname": "9ydws4ss6t.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "SERVFAIL",
+          "ra": true,
+          "aa": false,
+          "answers": [],
+          "latency_ms": 1.2,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      }
+    ],
+    "t08": [
+      {
+        "attempt": 1,
+        "nonce": "z4pai9f8kj",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "z4pai9f8kj.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": false,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 2.5,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 2,
+        "nonce": "7c5inxweln",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "7c5inxweln.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": false,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 1.9,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      },
+      {
+        "attempt": 3,
+        "nonce": "7f7gzjmhdo",
+        "label": "recursive",
+        "reason": "resolved+log_confirmed",
+        "log_hit": true,
+        "p1": {
+          "qname": "7f7gzjmhdo.probe.lab.test",
+          "qtype": "TXT",
+          "rd": true,
+          "ok": true,
+          "rcode": "NOERROR",
+          "ra": true,
+          "aa": false,
+          "answers": [
+            "\"aiori-probe-ok\""
+          ],
+          "latency_ms": 2.2,
+          "error": null,
+          "tries": 1
+        },
+        "p2": null
+      }
+    ]
+  }
+}
