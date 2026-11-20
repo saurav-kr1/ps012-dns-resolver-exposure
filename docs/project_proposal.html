@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>PS-012 Project Proposal</title><style>
+@page { size: A4; margin: 14mm 16mm 14mm 16mm; }
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10pt; line-height: 1.38; color: #2C2C2A; margin: 0; }
+h1 { font-size: 18pt; margin: 0; color: #26215C; font-weight: 600; line-height: 1.2; }
+h2 { font-size: 11.5pt; color: #26215C; border-bottom: 1.5px solid #AFA9EC; padding-bottom: 2px; margin: 11px 0 4px; font-weight: 600; page-break-after: avoid; }
+p { margin: 3px 0; } ul, ol { margin: 3px 0; padding-left: 18px; } li { margin: 1px 0; }
+table { border-collapse: collapse; width: 100%; margin: 4px 0 6px; font-size: 9.5pt; page-break-inside: avoid; }
+th, td { border: 1px solid #D3D1C7; padding: 3px 6px; text-align: left; vertical-align: top; }
+th { background: #EEEDFE; color: #26215C; font-weight: 600; }
+code { font-family: Consolas, monospace; font-size: 9pt; background: #F1EFE8; padding: 0 3px; border-radius: 3px; }
+.head { border-bottom: 3px solid #534AB7; padding-bottom: 6px; margin-bottom: 4px; }
+.kicker { font-size: 8.5pt; letter-spacing: 1.5px; text-transform: uppercase; color: #534AB7; font-weight: 600; }
+.who { font-size: 9.5pt; color: #444441; margin-top: 3px; }
+.small { font-size: 8.5pt; color: #5F5E5A; }
+</style></head><body>
+<div class="head"><div class="kicker">AIORI-3 · Cybersecurity · PS-012 · Project proposal</div>
+<h1>Authorised DNS Resolver Exposure Assessment</h1>
+<div class="who">Saurav Kumar (264101047) &amp; Tanay Umesh Hambire (264101057)</div></div>
+
+<h2>1. Background and problem</h2>
+<p>Open recursive DNS resolvers answer queries from anyone on the Internet. Because DNS mostly uses UDP, an attacker can forge the source address of a query so that the resolver sends a much larger answer to a victim (RFC 5358 gives an amplification factor of about 80). Thousands of forgotten open resolvers therefore let a small botnet produce gigabits of unwanted traffic in a <b>reflection and amplification DDoS attack</b>. RFC 5358 asks operators to serve recursion only to their intended clients.</p>
+<p><b>Problem:</b> operators need a precise, reproducible and ethical way to check whether their DNS servers follow that rule. Careless scanning can itself disrupt networks, so the method must be bounded and limited to authorised servers.</p>
+
+<h2>2. Objectives</h2>
+<ol>
+<li>Build a command-line probe tool that tests up to 20 authorised lab DNS servers from a separate client vantage point.</li>
+<li>Classify each server as <b>recursive</b>, <b>authoritative-only</b>, <b>refused</b> or <b>inconclusive</b>, with a reason code.</li>
+<li>Enforce configurable rate control (global and per-target limits, timeouts, retries, query budget) so every run is bounded and reproducible.</li>
+<li>Compare the results with a seeded ground truth and analyse false and inconclusive results.</li>
+</ol>
+
+<h2>3. Proposed solution</h2>
+<ul>
+<li><b>Controlled lab (Docker).</b> Two isolated networks without Internet access: a test-zone server we control (<code>lab.test</code>, with a query log), several target servers configured on purpose (open, ACL-restricted, interface-restricted, authoritative-only, silent, broken, lossy; using Unbound, dnsmasq and BIND), and a separate probe client acting as the outside vantage point. We know what each server really is, which gives the ground truth.</li>
+<li><b>Two probes.</b> P1 asks for a never-before-seen random name with recursion desired, so a correct answer proves a real lookup (no cache). P2 asks for the server's own zone with recursion off and looks for the authoritative flag, which separates an authoritative-only server from a closed resolver (both answer REFUSED to P1).</li>
+<li><b>Independent proof.</b> The test-zone log shows which server asked for each random name.</li>
+<li><b>Classification and voting.</b> A decision tree labels every attempt; three attempts per probe are combined by majority vote. Weak evidence becomes <i>inconclusive</i>, never a guess.</li>
+<li><b>Rate control.</b> A token bucket and a hard query budget keep each run bounded.</li>
+<li><b>Evaluation.</b> Accuracy, confusion matrix, precision and recall against the ground truth, repeated runs for reproducibility, and an analysis of false and inconclusive results.</li>
+</ul>
+
+<h2>4. Scope, ethics and constraints</h2>
+<table><tr><th style="width:50%">In scope</th><th>Out of scope (forbidden)</th></tr>
+<tr><td>Up to 20 authorised lab servers that we build and own; recursion exposure only; a controlled test zone; a separate client network; small standard queries at a bounded rate</td>
+<td>Internet-wide scanning or any server not on the allowlist; spoofed traffic (the real source address is always used); amplification or stress testing; testing anything other than recursion exposure</td></tr></table>
+<p>The tool will refuse to run if the target list has more than 20 entries or contains a public IP address.</p>
+
+<h2>5. Expected outcomes and deliverables</h2>
+<ul>
+<li>A DNS resolver probe tool, controlled labelled test cases, and a configurable rate-control mechanism</li>
+<li>Response classification and ground-truth comparison, and a DNS exposure assessment report</li>
+<li>A false/inconclusive result analysis, a technical demonstration with pseudocode, and a code repository with documentation</li>
+</ul>
+
+<h2>6. Work plan</h2>
+<table><tr><th style="width:20%">Phase</th><th>Work</th><th style="width:30%">Output</th></tr>
+<tr><td>1. Study</td><td>RFC 5358 and the problem statement; define scope and safety rules</td><td>Project definition, scope note</td></tr>
+<tr><td>2. Lab</td><td>Docker networks, test-zone server, target servers, answer key</td><td>Labelled test cases</td></tr>
+<tr><td>3. Tool</td><td>Rate limiter, probes, classifier, evaluator, report writer, automatic tests</td><td>Probe tool</td></tr>
+<tr><td>4. Evaluation</td><td>Repeated runs, accuracy and confusion matrix, false/inconclusive analysis, experiments</td><td>Results and analysis</td></tr>
+<tr><td>5. Delivery</td><td>Final report, documentation, demonstration</td><td>Report, repository, demo</td></tr></table>
+
+<h2>7. Risks and mitigations</h2>
+<table><tr><th style="width:44%">Risk</th><th>Mitigation</th></tr>
+<tr><td>Ambiguous replies (REFUSED from several server types; forwarders copying flags)</td><td>Authority probe, test-zone log as second proof, an <i>inconclusive</i> class with reason codes</td></tr>
+<tr><td>Packet loss or silent servers causing wrong labels</td><td>Retries with backoff and majority voting</td></tr>
+<tr><td>Generating too much traffic or touching real systems</td><td>Allowlist, private IPs only, rate limits, hard budget, isolated networks</td></tr>
+<tr><td>A wrong answer key in the lab</td><td>Check each server manually (<code>dig</code>) before running the tool</td></tr></table>
+
+<h2>8. References</h2>
+<p class="small">[1] J. Damas and F. Neves, <i>Preventing Use of Recursive Nameservers in Reflector Attacks</i>, RFC 5358 (BCP 140), 2008. https://www.rfc-editor.org/rfc/rfc5358.html &nbsp; [2] P. Mockapetris, RFC 1034, 1987. &nbsp; [3] P. Ferguson and D. Senie, <i>Network Ingress Filtering</i>, RFC 2827 (BCP 38), 2000. &nbsp; [4] AIORI-3 Hackathon, <i>PS-012: Authorised DNS Resolver Exposure Assessment</i>.</p>
+</body></html>
