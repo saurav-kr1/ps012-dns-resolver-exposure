@@ -70,13 +70,13 @@ rect.dash { fill: none; stroke: #888780; stroke-width: .8; stroke-dasharray: 5 4
   <div class="kicker">AIORI-3 · Cybersecurity · PS-012</div>
   <h1>Authorised DNS Resolver<br>Exposure Assessment</h1>
   <div class="sub">Technical submission: problem, solution, optimizations and architecture</div>
-  <div class="team"><span class="ph">[Team name]</span></div>
+  <div class="team" style="font-size:18pt">Saurav Kumar &amp; Tanay Umesh Hambire</div>
   <table>
     <tr><th style="width:55%">Team member</th><th>Roll number</th></tr>
     <tr><td>Saurav Kumar</td><td>264101047</td></tr>
     <tr><td>Tanay Umesh Hambire</td><td>264101057</td></tr>
   </table>
-  <div class="date">18 November 2026</div>
+  <div class="date">20 November 2026</div>
 </div>
 
 <!-- ================= 2. TOC ================= -->
@@ -360,10 +360,10 @@ Only allowlisted private lab addresses (public IPs rejected), at most 20 targets
 <tr><td>Project definition write-up completed</td><td>10 Oct 2026</td><td class="ok">Done</td></tr>
 <tr><td>Probe tool built, 23 automatic tests passing</td><td>18 Nov 2026</td><td class="ok">Done</td></tr>
 <tr><td>Docker lab built (8 targets + test zone); real assessment 8/8, three identical runs</td><td>18 Nov 2026</td><td class="ok">Done</td></tr>
-<tr><td>Private GitHub repository created, <code>aiori-hackathon</code> added, ownership transferred</td><td><span class="ph">[date]</span></td><td class="todo">Pending</td></tr>
-<tr><td>This PDF uploaded to the repository</td><td><span class="ph">[date]</span></td><td class="todo">Pending</td></tr>
-<tr><td>Final exposure assessment report and false/inconclusive analysis</td><td><span class="ph">[date]</span></td><td class="todo">Pending</td></tr>
-<tr><td>Prototype demonstration with pseudocode to the mentor</td><td><span class="ph">[date]</span></td><td class="todo">Pending</td></tr>
+<tr><td>Private GitHub repository created in the team's own GitHub account and code pushed</td><td>20 Nov 2026</td><td class="ok">Done</td></tr>
+<tr><td>This PDF uploaded to the repository</td><td>20 Nov 2026</td><td class="ok">Done</td></tr>
+<tr><td>Final exposure assessment report and false/inconclusive analysis</td><td>To be confirmed</td><td class="todo">Pending</td></tr>
+<tr><td>Prototype demonstration with pseudocode to the mentor</td><td>To be confirmed</td><td class="todo">Pending</td></tr>
 </table>
 
 <!-- ================= 8. REFERENCES ================= -->
@@ -392,7 +392,7 @@ Only allowlisted private lab addresses (public IPs rejected), at most 20 targets
 <p><b>Summary.</b> We built a reproducible, rate-limited tool that decides whether a DNS server provides recursion to an outside client, and tested it in a Docker lab of eight deliberately configured servers. It classified all eight correctly in three identical runs, stayed within its rate limit (peak 5 queries per second, 39 to 45 queries per run), and confirmed every open resolver with an independent proof from the test-zone log. Real-lab testing also uncovered problems that unit tests could not, such as forwarders copying the authoritative flag, and the tool was changed to handle them.</p>
 <p><b>Significance.</b> Open resolvers are the fuel for DNS amplification attacks. A safe, repeatable way to measure exposure lets operators find and close them, which is exactly what RFC 5358 asks for, without scanning anything they are not authorised to test. The honest "inconclusive" class, with reason codes, keeps the results trustworthy.</p>
 <p><b>Limitations.</b> The lab is a model of real networks. Results come from a single vantage point, so a server that is open only to some source networks could look refused from here. Only recursion exposure is tested.</p>
-<p><b>Next steps.</b> Complete the GitHub setup, finalise the exposure assessment report with the false and inconclusive result analysis, and demonstrate the tool and pseudocode to the mentor. Possible extensions are a second client network to test source-dependent restrictions and a larger target set of up to 20 servers.</p>
+<p><b>Next steps.</b> Finalise the exposure assessment report with the false and inconclusive result analysis, and demonstrate the tool and pseudocode to the mentor. Possible extensions are a second client network to test source-dependent restrictions and a larger target set of up to 20 servers.</p>
 
 </body>
 </html>
