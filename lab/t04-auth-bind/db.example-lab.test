@@ -1,0 +1,5 @@
+$TTL 60
+@     IN SOA ns1.example-lab.test. admin.example-lab.test. ( 1 3600 600 86400 60 )
+@     IN NS  ns1.example-lab.test.
+ns1   IN A   172.30.0.14
+www   IN A   192.0.2.10

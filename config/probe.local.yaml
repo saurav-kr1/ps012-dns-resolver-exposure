@@ -1,0 +1,18 @@
+# Settings for the NO-DOCKER practice run against the pretend servers (tests/fake_lab.py).
+zone: probe.lab.test
+expected_txt: aiori-probe-ok
+testzone_log: null              # no test-zone log in the pretend lab
+
+rate_control:
+  global_qps: 20
+  per_target_qps: 5
+  max_concurrency: 4
+  timeout_s: 0.5
+  retries: 1
+  backoff_s: 0.1
+  attempts_per_probe: 3
+  max_total_queries: 500
+
+safety:
+  max_targets: 20
+  require_private_ips: true

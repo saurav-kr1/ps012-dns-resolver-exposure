@@ -1,0 +1,116 @@
+# The lab. Two isolated networks (no Internet access):
+#   labnet     172.30.0.0/24  the "home" network of the servers + the test-zone server
+#   clientnet  172.31.0.0/24  where the probe client sits (the outside vantage point)
+# Every target has an address on BOTH networks.
+name: ps012
+
+x-lab: &lab
+  build: ./lab
+  image: ps012-dnslab
+
+networks:
+  labnet:
+    internal: true
+    ipam: { config: [{ subnet: 172.30.0.0/24 }] }
+  clientnet:
+    internal: true
+    ipam: { config: [{ subnet: 172.31.0.0/24 }] }
+
+volumes:
+  qlog: {}
+
+services:
+  testzone:
+    <<: *lab
+    command: ["named", "-f", "-c", "/etc/bind/named.conf"]
+    volumes: ["./lab/testzone:/etc/bind:ro", "qlog:/logs"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.2 }
+
+  t01:
+    <<: *lab
+    command: ["unbound", "-d", "-c", "/etc/unbound/unbound.conf"]
+    volumes: ["./lab/t01-open-unbound/unbound.conf:/etc/unbound/unbound.conf:ro"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.11 }
+      clientnet: { ipv4_address: 172.31.0.11 }
+
+  t02:
+    <<: *lab
+    command: ["dnsmasq", "-k", "-C", "/etc/dnsmasq.conf"]
+    volumes: ["./lab/t02-open-dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf:ro"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.12 }
+      clientnet: { ipv4_address: 172.31.0.12 }
+
+  t03:
+    <<: *lab
+    command: ["unbound", "-d", "-c", "/etc/unbound/unbound.conf"]
+    volumes: ["./lab/t03-acl-unbound/unbound.conf:/etc/unbound/unbound.conf:ro"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.13 }
+      clientnet: { ipv4_address: 172.31.0.13 }
+
+  t04:
+    <<: *lab
+    command: ["named", "-f", "-c", "/etc/bind/named.conf"]
+    volumes: ["./lab/t04-auth-bind:/etc/bind:ro"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.14 }
+      clientnet: { ipv4_address: 172.31.0.14 }
+
+  t05:
+    <<: *lab
+    command: ["unbound", "-d", "-c", "/etc/unbound/unbound.conf"]
+    volumes: ["./lab/t05-iface-unbound/unbound.conf:/etc/unbound/unbound.conf:ro"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.15 }
+      clientnet: { ipv4_address: 172.31.0.15 }
+
+  t06:                                   # "dead" target: nothing listens on port 53
+    <<: *lab
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.16 }
+      clientnet: { ipv4_address: 172.31.0.16 }
+
+  t07:
+    <<: *lab
+    command: ["unbound", "-d", "-c", "/etc/unbound/unbound.conf"]
+    volumes: ["./lab/t07-servfail-unbound/unbound.conf:/etc/unbound/unbound.conf:ro"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.17 }
+      clientnet: { ipv4_address: 172.31.0.17 }
+
+  t08:                                   # open resolver behind 20% packet loss on replies to the client
+    <<: *lab
+    cap_add: ["NET_ADMIN"]
+    command:
+      - sh
+      - -c
+      - "IF=$$(ip -o -4 addr show | grep 172.31.0.18 | awk '{print $$2}'); tc qdisc add dev $$IF root netem loss 20%; exec unbound -d -c /etc/unbound/unbound.conf"
+    volumes: ["./lab/t08-lossy-unbound/unbound.conf:/etc/unbound/unbound.conf:ro"]
+    networks:
+      labnet: { ipv4_address: 172.30.0.18 }
+      clientnet: { ipv4_address: 172.31.0.18 }
+
+  # ---- tools: only started when you ask (docker compose run ...) ----
+  probe:
+    profiles: ["tools"]
+    build: { context: ., dockerfile: probe.Dockerfile }
+    image: ps012-probe
+    command: ["python", "-m", "probe.main", "--config", "config/probe.yaml", "--targets", "config/targets.yaml"]
+    volumes:
+      - ./probe:/app/probe:ro
+      - ./config:/app/config:ro
+      - ./results:/app/results
+      - qlog:/logs:ro
+    networks:
+      clientnet: { ipv4_address: 172.31.0.100 }
+
+  dig:                                   # a plain shell on the client network, for manual tests
+    <<: *lab
+    profiles: ["tools"]
+    entrypoint: ["sh"]
+    networks:
+      clientnet: { ipv4_address: 172.31.0.101 }

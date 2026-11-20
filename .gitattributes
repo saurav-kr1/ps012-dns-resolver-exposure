@@ -1,0 +1,4 @@
+# Keep Unix line endings everywhere: the lab configs run inside Linux containers.
+* text=auto eol=lf
+*.pdf binary
+*.png binary

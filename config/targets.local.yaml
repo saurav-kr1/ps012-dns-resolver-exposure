@@ -1,0 +1,8 @@
+# Ground truth for the pretend lab started with:  python -m tests.fake_lab
+targets:
+  - {id: f01, name: fake-open,     ip: 127.0.0.1, port: 15301, expected: recursive}
+  - {id: f02, name: fake-refused,  ip: 127.0.0.1, port: 15302, expected: refused}
+  - {id: f03, name: fake-auth,     ip: 127.0.0.1, port: 15303, own_zone: example-lab.test, expected: authoritative-only}
+  - {id: f04, name: fake-silent,   ip: 127.0.0.1, port: 15304, expected: inconclusive}
+  - {id: f05, name: fake-servfail, ip: 127.0.0.1, port: 15305, expected: inconclusive}
+  - {id: f06, name: fake-flaky,    ip: 127.0.0.1, port: 15306, expected: recursive}

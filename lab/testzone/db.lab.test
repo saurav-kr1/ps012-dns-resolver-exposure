@@ -1,0 +1,6 @@
+$TTL 60
+@     IN SOA ns1.lab.test. admin.lab.test. ( 1 3600 600 86400 60 )
+@     IN NS  ns1.lab.test.
+ns1   IN A   172.30.0.2
+; wildcard: ANY name under probe.lab.test answers with our marker text
+*.probe IN TXT "aiori-probe-ok"

@@ -1,0 +1,9 @@
+id,name,ip,expected,label,match,reason,evidence
+t01,open-unbound,172.31.0.11,recursive,recursive,True,resolved+log_confirmed,"P1 rcode=NOERROR, RA=1 AA=0"
+t02,open-dnsmasq,172.31.0.12,recursive,recursive,True,resolved+log_confirmed,"P1 rcode=NOERROR, RA=1 AA=1"
+t03,acl-unbound,172.31.0.13,refused,refused,True,rcode_refused,"P1 rcode=REFUSED, RA=0 AA=0"
+t04,auth-bind,172.31.0.14,authoritative-only,authoritative-only,True,aa_on_own_zone,"P1 rcode=REFUSED, RA=0 AA=0"
+t05,iface-unbound,172.31.0.15,inconclusive,inconclusive,True,no_response,P1 rcode=timeout
+t06,dead,172.31.0.16,inconclusive,inconclusive,True,no_response,P1 rcode=timeout
+t07,servfail-unbound,172.31.0.17,inconclusive,inconclusive,True,servfail,"P1 rcode=SERVFAIL, RA=1 AA=0"
+t08,lossy-unbound,172.31.0.18,recursive,recursive,True,resolved+log_confirmed,"P1 rcode=NOERROR, RA=1 AA=0"

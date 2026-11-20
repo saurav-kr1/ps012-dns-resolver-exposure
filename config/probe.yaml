@@ -1,0 +1,20 @@
+# Settings for the probe tool (used inside the Docker lab).
+# Everything that affects a run lives here, so a run can be repeated exactly.
+
+zone: probe.lab.test            # probes ask for <random-name>.probe.lab.test
+expected_txt: aiori-probe-ok    # what the test zone answers with
+testzone_log: /logs/query.log   # test-zone query log (mounted into the probe container)
+
+rate_control:
+  global_qps: 5                 # max queries per second, all targets together
+  per_target_qps: 1             # max queries per second to any one target
+  max_concurrency: 4            # targets tested at the same time
+  timeout_s: 2                  # wait this long for one reply
+  retries: 2                    # extra tries after a timeout (needed for the lossy target)
+  backoff_s: 0.5                # pause before a retry
+  attempts_per_probe: 3         # repeat each test 3 times, then majority vote
+  max_total_queries: 500        # HARD STOP for the whole run
+
+safety:
+  max_targets: 20               # project limit
+  require_private_ips: true     # refuse any public IP address

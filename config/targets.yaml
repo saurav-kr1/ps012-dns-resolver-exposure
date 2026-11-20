@@ -1,0 +1,62 @@
+# The ALLOWLIST and the GROUND TRUTH in one file.
+# ip      = where the probe client sends queries (clientnet, 172.31.0.x)
+# lab_ip  = the address the test-zone server sees when this target recurses (labnet, 172.30.0.x)
+# expected = what we KNOW this server is, because we configured it ourselves.
+
+targets:
+  - id: t01
+    name: open-unbound
+    ip: 172.31.0.11
+    lab_ip: 172.30.0.11
+    expected: recursive
+    description: Unbound that answers recursive queries from anyone
+
+  - id: t02
+    name: open-dnsmasq
+    ip: 172.31.0.12
+    lab_ip: 172.30.0.12
+    expected: recursive
+    description: dnsmasq forwarder that answers anyone
+
+  - id: t03
+    name: acl-unbound
+    ip: 172.31.0.13
+    lab_ip: 172.30.0.13
+    expected: refused
+    description: Unbound that only serves the lab network (RFC 5358 Method 1, ACL)
+
+  - id: t04
+    name: auth-bind
+    ip: 172.31.0.14
+    lab_ip: 172.30.0.14
+    own_zone: example-lab.test
+    expected: authoritative-only
+    description: BIND with recursion off, authoritative for example-lab.test
+
+  - id: t05
+    name: iface-unbound
+    ip: 172.31.0.15
+    lab_ip: 172.30.0.15
+    expected: inconclusive
+    description: Unbound listening only on the lab interface (RFC 5358 Method 2); no reply on the probed address
+
+  - id: t06
+    name: dead
+    ip: 172.31.0.16
+    lab_ip: 172.30.0.16
+    expected: inconclusive
+    description: Nothing is listening on port 53
+
+  - id: t07
+    name: servfail-unbound
+    ip: 172.31.0.17
+    lab_ip: 172.30.0.17
+    expected: inconclusive
+    description: Open resolver whose upstream is broken, so it answers SERVFAIL
+
+  - id: t08
+    name: lossy-unbound
+    ip: 172.31.0.18
+    lab_ip: 172.30.0.18
+    expected: recursive
+    description: Open resolver behind 20% packet loss; retries and majority vote must still find it
