@@ -133,7 +133,7 @@ docker compose down
 | Pseudocode snippet for the mentor | `docs/pseudocode.txt` |
 | Experiment A: no test-zone log (dnsmasq becomes inconclusive) | `docker compose run --rm probe python -m probe.main --config config/probe.nolog.yaml --out results/nolog` |
 | Experiment B: packet loss vs retries on t08 | `docker compose run --rm probe python -m probe.experiments lossy --runs 40` |
-| **Project report** (problem, objectives, design, work completed, limitations, challenges, conclusions) | `docs/PS-012_Project_Report.pdf` |
+| **Project report** (problem, objectives, design, work completed, limitations, challenges, conclusions) | `docs/PS-012_Project_Report.pdf` (editable Word version: `docs/PS-012_Project_Report.docx`) |
 | **Presentation** (15 slides, speaker notes with timings) | `docs/PS-012_Presentation.pptx` |
 | 2-page project proposal | `docs/PS-012_Project_Proposal_2page.pdf` |
 | Final exposure assessment report (with false/inconclusive analysis) | `docs/PS-012_Final_Exposure_Report.pdf` |
